@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Card base */
+.auth-section,
+.users-panel,
+.video-panel {
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+}
+
+/* Headings */
+h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+h3 {
+    color: #444;
+    margin-bottom: 15px;
+}
+
+/* Login */
+.auth-section {
+    max-width: 400px;
+    margin: auto;
+    text-align: center;
+}
+
+.auth-section p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.auth-section input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+.auth-section input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.auth-section button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.auth-section button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102,126,234,0.4);
+}
+
+/* Dashboard */
+.dashboard {
+    display: none;
+}
+
+.users-panel ul {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#users li {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#users li:hover {
+    background: #eef1ff;
+    transform: translateX(5px);
+}
+
+.student-info {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Video */
+.video-panel video {
+    width: 100%;
+    border-radius: 10px;
+    background: #000;
+}
+
+/* Status messages */
+#status {
+    margin-top: 10px;
+    font-style: bold;
+    color: #555;
+}
+
+.no-users {
+    text-align: center;
+    color: #999;
+}
+
+/* Messages */
+.error {
+    color: #dc3545;
+    margin-top: 10px;
+}
+
+.success {
+    color: #28a745;
+    margin-top: 10px;
+}
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="auth-section" id="authSection">
+            <h2>Admin Login</h2>
+            <p>Enter admin password to access dashboard</p>
+            <input type="password" id="adminPass" placeholder="Admin Password">
+            <button id="loginBtn">Login</button>
+            <p id="authMessage" class="error"></p>
+        </div>
+        
+        <div class="dashboard" id="dashboard">
+            <h2>Admin Dashboard</h2>
+            
+            <div class="users-panel">
+                <h3>Active Students</h3>
+                <ul id="users"></ul>
+                <p id="noUsers" class="no-users">No active students</p>
+            </div>
+            
+            <div class="video-panel">
+                <h3>Live Monitoring</h3>
+                <video id="video" autoplay controls></video>
+                <p id="status">Select a student to monitor</p>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+   
+    <script src="admin.js"></script>
+</body>
+</html> 
+
+

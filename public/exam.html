@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Examination</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            text-align: left;
+        }
+        
+        .status-title {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+        
+        .status-message {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            margin-top: 15px;
+        }
+        
+        .warning .status-title {
+            color: #856404;
+        }
+        
+        .danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .danger .status-title {
+            color: #721c24;
+        }
+        
+        .warning-counter {
+            display: inline-block;
+            background: #ffc107;
+            color: #856404;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .exam-active {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .exam-active h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Socket.io CDN -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Initialize socket connection
+        window.socket = io({
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+        
+        // Log connection status
+        window.socket.on('connect', () => {
+            console.log('✅ Exam page: Connected to server');
+        });
+        
+        window.socket.on('connect_error', (error) => {
+            console.error('❌ Exam page: Connection error:', error);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-graduation-cap"></i> Online Examination</h2>
+        <p class="subtitle">Please enter your details to begin the exam</p>
+        
+        <div class="input-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Enter your full name">
+        </div>
+        
+        <button id="startBtn" onclick="startExam()">
+            <i class="fas fa-play"></i> Start Exam
+        </button>
+        
+        <div id="status" style="display: none;">
+            <div class="status-title" id="statusTitle">Status</div>
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+        
+        <div class="warning" id="warningStatus" style="display: none;">
+            <div class="status-title">
+                <i class="fas fa-exclamation-triangle"></i> Important
+                <span class="warning-counter" id="warningCount">0/3</span>
+            </div>
+            <div class="status-message">
+                Please stay on this page. Do not switch tabs or windows.
+            </div>
+        </div>
+        
+        <div class="exam-active" id="examActive">
+            <h3><i class="fas fa-desktop"></i> Exam in Progress</h3>
+            <p>Your screen is being monitored. Do not:</p>
+            <ul style="text-align: left; margin: 15px 0; padding-left: 20px;">
+                <li>Switch tabs or windows</li>
+                <li>Minimize the browser</li>
+                <li>Close the browser</li>
+            </ul>
+            <button onclick="endExam()" style="background: #dc3545;">
+                <i class="fas fa-stop-circle"></i> End Exam
+            </button>
+        </div>
+    </div>
+
+    <!-- Font Awesome Icons -->
+    
+    
+    <!-- Load exam.js AFTER socket is initialized -->
+    <script src="exam.js"></script>
+</body>
+</html>
